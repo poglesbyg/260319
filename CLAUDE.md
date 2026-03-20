@@ -70,6 +70,18 @@ decidex/
 
 **MCP server** — `packages/mcp/` exposes `get_decisions(area, limit?)` and `get_stats()` tools via stdio transport. Add to Claude Code config with `"command": "decidex-mcp", "args": ["--repo", "/path/to/project"]`.
 
+## Design System
+
+Always read `DESIGN.md` before making any visual or UI decisions.
+All font choices, colors, spacing, and aesthetic direction are defined there.
+Do not deviate without explicit user approval.
+
+Key rules for any future web/landing page work:
+- Fonts: JetBrains Mono (display + code + labels), Instrument Sans (body)
+- Palette: warm near-black `#131110`, amber accent `#D4953A`, off-white `#EDE8E0`
+- Zero border-radius on structural elements (cards, buttons, cells). `4px` on inputs only.
+- No glassmorphism, no gradient decorations, no rounded pills.
+
 ## Testing
 
 Tests live in `packages/core/src/*.test.ts`. Run with `vitest`. No test files in `packages/cli` (integration tested manually).
