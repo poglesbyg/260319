@@ -9,8 +9,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-npm run build        # tsc -b (respects project reference ordering: core → cli)
-npm test             # run all tests (vitest, 38 tests in packages/core)
+npm run build        # tsc -b (respects project reference ordering: core → cli → mcp)
+npm test             # run all tests (vitest, 60 tests in packages/core)
 npm run clean        # delete dist/ in all packages
 
 # Per-package
@@ -38,8 +38,10 @@ decidex/
 │   │       └── index.ts            Re-exports
 │   ├── cli/           decidex binary
 │   │   └── src/
-│   │       ├── main.ts      commander entry point (generate, stats, scan)
+│   │       ├── main.ts      commander entry point (init, generate, capture, stats, scan)
+│   │       ├── init.ts      init command — hooks + MCP config
 │   │       ├── generate.ts  generate command + watch mode orchestration
+│   │       ├── capture.ts   capture command — manual decision authoring
 │   │       ├── stats.ts     stats command
 │   │       └── git.ts       git utilities (getCommits, getCommitsSince, getHeadCommit, etc.)
 │   └── mcp/           @decidex/mcp — MCP server for Claude Code

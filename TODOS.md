@@ -1,11 +1,16 @@
 # TODOS
 
-## Phase 1b — SHIPPED ✓
+## Phase 1b + Polish — SHIPPED ✓
 
 - ✓ Ollama model quality warning — `checkOllamaModels()` in `git-classifier.ts`
 - ✓ `decidex generate --watch` mode — incremental via `.decidex/state.json` + poll loop
 - ✓ Multi-tool injection — `--tools cursor,copilot,windsurf` writes to tool context files
 - ✓ MCP server — `packages/mcp/` with `get_decisions` and `get_stats` tools
+- ✓ `decidex capture` command — manual decision authoring
+- ✓ `decidex init` command — hooks + MCP config (Claude Code + Claude Desktop)
+- ✓ Post-commit hook — auto-runs `decidex generate --yes` after each commit
+- ✓ GitHub Actions CI — `.github/workflows/test.yml` (Node 20 + 22)
+- ✓ README.md — install, quickstart, all commands, MCP setup, multi-tool injection
 
 ---
 

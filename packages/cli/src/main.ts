@@ -2,6 +2,8 @@
 import { Command } from "commander";
 import { runGenerate, runWatch } from "./generate.js";
 import { runStats } from "./stats.js";
+import { runCapture } from "./capture.js";
+import { runInit } from "./init.js";
 
 const program = new Command();
 
@@ -9,6 +11,14 @@ program
   .name("decidex")
   .description("Capture engineering decisions so your AI tools never forget them")
   .version("0.1.0");
+
+program
+  .command("init")
+  .description("Wire up decidex: install git hooks and configure MCP for Claude Code")
+  .option("--no-hook", "Skip git hook installation")
+  .action((opts) => {
+    runInit(process.cwd(), { noHook: !opts.hook });
+  });
 
 program
   .command("generate")
@@ -43,6 +53,32 @@ program
   });
 
 program
+  .command("capture <text>")
+  .description("Manually add an engineering decision")
+  .option("--area <path>", "Relative directory this decision applies to (e.g. src/auth/)", "")
+  .option("--confidence <n>", "Confidence level 1-5 (default: 5 for manually authored)", "5")
+  .option("--rationale <text>", "Why this decision was made")
+  .option(
+    "--tags <list>",
+    "Comma-separated tags",
+    (val: string) => val.split(",").map((s) => s.trim()).filter(Boolean)
+  )
+  .option(
+    "--tools <list>",
+    "Also update AI tool context files: cursor,copilot,windsurf",
+    (val: string) => val.split(",").map((s) => s.trim()).filter(Boolean)
+  )
+  .action((text: string, opts) => {
+    runCapture(process.cwd(), text, {
+      area: opts.area,
+      confidence: parseInt(opts.confidence, 10),
+      rationale: opts.rationale,
+      tags: opts.tags,
+      tools: opts.tools,
+    });
+  });
+
+program
   .command("stats")
   .description("Show a summary of captured engineering decisions")
   .action(() => {
@@ -53,7 +89,9 @@ program
   .command("scan <file>")
   .description("Scan a decision file for secrets (used by the pre-commit hook)")
   .action((file: string) => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { scanText } = require("@decidex/core");
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const fs = require("node:fs");
     const text = fs.readFileSync(file, "utf8");
     const result = scanText(text, process.cwd());

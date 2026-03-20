@@ -65,6 +65,39 @@ export function scanText(text: string, repoRoot: string): ScanResult {
   return { clean: findings.length === 0, findings };
 }
 
+/**
+ * Install a post-commit hook that runs `decidex generate --yes` incrementally.
+ * Uses the state store so only new commits are classified (fast).
+ */
+export function installPostCommitHook(repoRoot: string): void {
+  const hooksDir = path.join(repoRoot, ".git", "hooks");
+  const hookPath = path.join(hooksDir, "post-commit");
+
+  if (!fs.existsSync(hooksDir)) {
+    throw new Error(`Not a git repo or .git/hooks missing: ${hooksDir}`);
+  }
+
+  const hookScript = `#!/bin/sh
+# decidex auto-update — added by 'decidex init'
+# Runs incrementally (only new commits). Fast when state exists.
+# To disable: remove this block or run 'decidex init --no-hook'
+
+if command -v decidex >/dev/null 2>&1; then
+  decidex generate --yes >/dev/null 2>&1 &
+fi
+exit 0
+`;
+
+  if (fs.existsSync(hookPath)) {
+    const existing = fs.readFileSync(hookPath, "utf8");
+    if (existing.includes("decidex auto-update")) return; // already installed
+    fs.appendFileSync(hookPath, "\n" + hookScript);
+  } else {
+    fs.writeFileSync(hookPath, hookScript, { mode: 0o755 });
+  }
+  fs.chmodSync(hookPath, 0o755);
+}
+
 /** Install a pre-commit hook that scans .decisions/ for secrets. */
 export function installPreCommitHook(repoRoot: string): void {
   const hooksDir = path.join(repoRoot, ".git", "hooks");
