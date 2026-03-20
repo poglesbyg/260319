@@ -5,10 +5,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/decidex/decidex.git",
+    "url": "https://github.com/poglesbyg/decidex.git",
     "directory": "packages/mcp"
   },
-  "homepage": "https://github.com/decidex/decidex#readme",
+  "homepage": "https://github.com/poglesbyg/decidex#readme",
   "keywords": ["ai", "claude", "mcp", "decisions", "engineering"],
   "bin": {
     "decidex-mcp": "./dist/index.js"
