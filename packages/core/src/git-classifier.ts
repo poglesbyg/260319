@@ -98,7 +98,18 @@ export class ClaudeAPIClassifier implements ClassifierInterface {
     });
 
     const text = response.content.find((b) => b.type === "text")?.text ?? "";
-    return parseClassifierResponse(text);
+    try {
+      return parseClassifierResponse(text);
+    } catch (err) {
+      try {
+        const fs = await import("node:fs");
+        const path = await import("node:path");
+        const outDir = path.join(process.cwd(), ".decidex");
+        fs.mkdirSync(outDir, { recursive: true });
+        fs.writeFileSync(path.join(outDir, "last_claude_response.txt"), String(text).slice(0, 10000), "utf8");
+      } catch {}
+      throw err;
+    }
   }
 }
 
@@ -129,13 +140,14 @@ export class OllamaClassifier implements ClassifierInterface {
       return parseClassifierResponse(data.response);
     } catch (err) {
       try {
-        // Attempt to write the full JSON body to a local file for debugging
+        // Attempt to write the full JSON body and raw text to a local file for debugging
         const fs = await import("node:fs");
         const path = await import("node:path");
         const outDir = path.join(process.cwd(), ".decidex");
         try {
           fs.mkdirSync(outDir, { recursive: true });
           fs.writeFileSync(path.join(outDir, "last_ollama_response.json"), JSON.stringify(data, null, 2), "utf8");
+          fs.writeFileSync(path.join(outDir, "last_ollama_response.txt"), String(data.response).slice(0, 10000), "utf8");
         } catch {}
       } catch {}
       throw err;
@@ -203,10 +215,27 @@ function parseClassifierResponse(text: string): ClassifiedDecision[] {
   if (parsed === null) {
     // last resort: try to find any {...} span using a simple regex
     const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error(`No JSON found in classifier response: ${text.slice(0, 240)}`);
+    if (!jsonMatch) {
+      // write raw response for inspection
+      try {
+        const fs = await import("node:fs");
+        const path = await import("node:path");
+        const outDir = path.join(process.cwd(), ".decidex");
+        fs.mkdirSync(outDir, { recursive: true });
+        fs.writeFileSync(path.join(outDir, "last_classifier_response.txt"), String(text).slice(0, 10000), "utf8");
+      } catch {}
+      throw new Error(`No JSON found in classifier response: ${text.slice(0, 240)}`);
+    }
     try {
       parsed = JSON.parse(jsonMatch[0]);
     } catch (err) {
+      try {
+        const fs = await import("node:fs");
+        const path = await import("node:path");
+        const outDir = path.join(process.cwd(), ".decidex");
+        fs.mkdirSync(outDir, { recursive: true });
+        fs.writeFileSync(path.join(outDir, "last_classifier_response.txt"), String(text).slice(0, 10000), "utf8");
+      } catch {}
       throw new Error(`Failed to parse JSON from classifier response: ${(err as Error).message}`);
     }
   }
