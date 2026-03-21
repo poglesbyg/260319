@@ -1,5 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
+import * as fs from "node:fs";
+import * as path from "node:path";
 import { ClassifiedDecision, ClassifyResult } from "./types.js";
 
 /*
@@ -218,8 +220,6 @@ function parseClassifierResponse(text: string): ClassifiedDecision[] {
     if (!jsonMatch) {
       // write raw response for inspection
       try {
-        const fs = await import("node:fs");
-        const path = await import("node:path");
         const outDir = path.join(process.cwd(), ".decidex");
         fs.mkdirSync(outDir, { recursive: true });
         fs.writeFileSync(path.join(outDir, "last_classifier_response.txt"), String(text).slice(0, 10000), "utf8");
@@ -230,8 +230,6 @@ function parseClassifierResponse(text: string): ClassifiedDecision[] {
       parsed = JSON.parse(jsonMatch[0]);
     } catch (err) {
       try {
-        const fs = await import("node:fs");
-        const path = await import("node:path");
         const outDir = path.join(process.cwd(), ".decidex");
         fs.mkdirSync(outDir, { recursive: true });
         fs.writeFileSync(path.join(outDir, "last_classifier_response.txt"), String(text).slice(0, 10000), "utf8");
