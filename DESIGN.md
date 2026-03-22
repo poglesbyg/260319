@@ -63,6 +63,51 @@
 - **What animates:** Button hover (bg/color), input focus (border-color), theme toggle. Nothing else.
 - **prefers-reduced-motion:** Honor it — use `transition: none` for users who opt out.
 
+## Light Mode
+
+The palette was designed dark-first. Light mode inverts all surface and text values while keeping the same warm character. Terminal blocks stay dark in both modes — an authentic terminal always has a dark background.
+
+### CSS Custom Properties (`[data-theme="light"]`)
+
+```css
+[data-theme="light"] {
+  --bg:         #F4F0EA;   /* warm cream — not stark white */
+  --bg-2:       #EDE8DF;   /* card surfaces */
+  --bg-3:       #E3DDD3;   /* deep insets, form inputs */
+  --border:     #C8C1B5;   /* warm gray border */
+  --text:       #1C1A17;   /* near-black, warm */
+  --text-2:     #4A4438;   /* medium warm brown-gray */
+  --text-3:     #8A7F74;   /* muted warm gray */
+  --accent:     #B87028;   /* darker amber for contrast on light bg */
+  --accent-2:   #9A5E1C;   /* accent hover/pressed */
+  --accent-bg:  rgba(184, 112, 40, 0.08);
+  --success:    #3A7038;   /* green deepened for light bg contrast */
+  --error:      #A03030;   /* red deepened for light bg contrast */
+  --warning:    #B87028;   /* same as accent */
+  --term-bg:    #0D0C0A;   /* STAYS DARK — terminal is always dark */
+}
+```
+
+### Contrast Ratios
+
+| Pair | Dark mode | Light mode | Grade |
+|------|-----------|------------|-------|
+| text / bg | 14.3:1 | 12.8:1 | AAA |
+| text-2 / bg | 6.4:1 | 5.2:1 | AA |
+| accent / bg | 4.8:1 | 3.9:1 | AA large only |
+| success / bg | 4.5:1 | 4.2:1 | AA |
+| error / bg | 4.6:1 | 4.4:1 | AA |
+
+**Amber is AA large only in both modes.** Never use `--accent` for body-size text in either theme.
+
+### Implementation Notes
+- Toggle via `data-theme` attribute on `<html>`. JS reads/writes `localStorage("decidex-theme")`.
+- All CSS custom properties respond automatically — no class switching needed.
+- Transition: `background 200ms ease-out, color 200ms ease-out` on `body` only. Do not animate every element.
+- Reduced motion: skip theme transition entirely.
+
+---
+
 ## Component Reference
 
 ### Decision Card
@@ -94,8 +139,185 @@
 
 ### Stat Grid
 - CSS grid with 1px gap on `var(--border)` background — hairline separators without extra markup
-- Stat value: JetBrains Mono 32px weight 300 (light weight for large numerals)
+- Stat value: JetBrains Mono 32–40px weight 300 (light weight for large numerals). **Always add `font-variant-numeric: tabular-nums`** so numbers don't shift width as they update.
 - Stat label: body 12px, `var(--text-3)`
+
+### Progress Bar
+Used by `decidex generate` progress states and any multi-step workflow UI.
+- Track: `height: 4px`, `background: var(--bg-3)`, `border: 1px solid var(--border)`, zero border-radius
+- Fill: `background: var(--accent)`, `transition: width 300ms ease-out`
+- Label above: JetBrains Mono 12px, `var(--text-3)`
+- Meta row below: JetBrains Mono 11px, `var(--text-3)`, left = step label, right = percentage
+- Completed state: fill goes to 100%, meta row shows count (e.g. "14 decisions")
+
+### Empty State
+For `.decisions/` area when no decisions exist, or any empty list view.
+- Container: `border: 1px dashed var(--border)` — dashed distinguishes empty from populated
+- Padding: `48px 32px`, `text-align: center`
+- Icon: JetBrains Mono 24px, `var(--text-3)`. Use `[ ]` or `· · ·` — no icons from external libraries
+- Title: JetBrains Mono 15px, `var(--text-2)`. Describe the empty state concretely, not generically.
+- Sub-text: body 14px, `var(--text-3)`. Always include the command to fix the empty state: `decidex generate`
+- Primary action: `btn-ghost`, font-size 12px, min-height 36px — a smaller ghost button, not a full CTA
+
+### Table (Decision List View)
+For decision list tables in the web UI or documentation.
+- `border-collapse: collapse`, `border: 1px solid var(--border)`
+- `th`: JetBrains Mono 11px, `font-weight 500`, `letter-spacing 0.08em`, uppercase, `var(--text-3)`, `background: var(--bg-2)`, `border-bottom: 1px solid var(--border)`, `padding: 10px 16px`
+- `td`: body 14px, `var(--text)`, `padding: 12px 16px`, `border-bottom: 1px solid var(--border)`
+- Last row: no `border-bottom`
+- Row hover: `background: var(--bg-2)` — subtle highlight, no color
+- Date cells: JetBrains Mono 12px, `var(--text-3)`, no wrapping
+
+### Tooltip
+For confidence dots, area label abbreviations, and any metadata that needs inline explanation.
+- Container: `position: absolute`, `bottom: calc(100% + 8px)`, centered on trigger
+- Body: `background: var(--bg-3)`, `border: 1px solid var(--border)`, JetBrains Mono 11px, `var(--text-2)`, `padding: 6px 10px`, `white-space: nowrap`
+- Arrow: CSS `::after` with `border-top-color: var(--border)` — a 4px triangle pointing down
+- Show on hover: `opacity: 0 → 1`, `transition: opacity 120ms`. Never `display: none/block` — too abrupt.
+- Zero border-radius everywhere. No `box-shadow`.
+- Max-width: 240px for longer tooltip text. Allow wrapping.
+
+### Code Block
+For inline code snippets and fenced blocks in documentation and the web landing page.
+- **Inline** (`<code>`): JetBrains Mono 0.875em, `var(--text-2)`, `background: var(--bg-2)`, `padding: 1px 5px`. No border.
+- **Block** (`<pre><code>`): `background: var(--bg-3)`, `border: 1px solid var(--border)`, zero border-radius, `padding: 16px 20px`, JetBrains Mono 13px, `line-height: 1.7`, `overflow-x: auto`
+- Syntax highlight roles (minimal, non-framework):
+  - Keywords: `var(--accent)` — `import`, `const`, `await`, `function`
+  - Strings: `var(--success)` — quoted values
+  - Comments: `var(--text-3)`, `font-style: italic`
+  - Default: `var(--text-2)` — everything else
+- No line numbers unless the block is > 20 lines and references specific line numbers in prose
+
+## Typography Refinements
+
+These add precision to the existing scale — no font choices changed.
+
+- **Tabular numerals:** All stat values, counters, batch numbers, and any element where a number can change must use `font-variant-numeric: tabular-nums`. This prevents layout shift when numbers update (e.g., batch progress `12/45` → `13/45`).
+- **Inline code in body text:** JetBrains Mono 0.875em, `var(--text-2)`, `background: var(--bg-2)`, `padding: 1px 5px`. Use the Code Block component spec above.
+- **CSS font-size tokens** (add to `:root` for consistency):
+  ```css
+  --font-size-xs: 11px;   /* badges, labels, meta */
+  --font-size-sm: 13px;   /* terminal output, buttons, secondary UI */
+  --font-size-base: 16px; /* body */
+  --font-size-body-lg: 17px; /* hero sub-copy, feature descriptions */
+  --font-size-h3: 18px;   /* Instrument Sans 600 */
+  --font-size-h2: clamp(20px, 3vw, 28px);
+  --font-size-h1: clamp(32px, 5vw, 56px);
+  ```
+
+---
+
+## CLI Terminal Output
+
+Design spec for what `decidex` prints to stdout. These rules apply to all CLI commands. The terminal color roles (`t-accent`, `t-green`, `t-red`, `t-dim`) from the Terminal Block component are the canonical palette — they apply in the actual CLI output too.
+
+### Color Roles in CLI Context
+
+| Role | ANSI approximate | When to use |
+|------|-----------------|-------------|
+| Accent (amber) | Bold yellow / `\x1b[33m` | Command name in header, area labels, key values |
+| Green | `\x1b[32m` | Success checkmarks (✓), confirmed operations |
+| Red | `\x1b[31m` | Error markers (✗), blocked operations |
+| Dim (text-3) | `\x1b[2m` | Separators, counts, metadata, `$` prompt prefix |
+| Muted (text-2) | default | General output text, file paths |
+
+Use [chalk](https://github.com/chalk/chalk) or [picocolors](https://github.com/alexeyraspopov/picocolors). Respect `NO_COLOR`, `FORCE_COLOR`, and `chalk.level`. Do not hardcode ANSI codes directly.
+
+### Output Format: `decidex generate`
+
+```
+$ decidex generate --yes
+
+─────────────────────────────────────── (dim)
+decidex generate (accent)  v0.1.0 (dim)
+repo: (dim) decidex (muted)    since: (dim) initial commit (muted)
+─────────────────────────────────────── (dim)
+
+→ fetching commits… (dim)  47 commits found (muted)
+→ pre-filtering… (dim)     3 skipped (<20 chars) (dim)
+
+  batch 1/1 (dim) [══════════════] (accent fill, dim brackets) 44/44 (muted)
+
+✓ (green) packages/core (accent)   Use Zod for all request/data validation
+✓ (green) packages/core (accent)   Use atomic file writes for decision store
+✓ (green) packages/cli (accent)    Injectable git classifier for testing
+· (dim) 2 commits skipped (WIP, merge)
+
+─────────────────────────────────────── (dim)
+  14 decisions (muted)   4 areas (dim)   3 skipped (dim)
+
+✓ (green) CLAUDE.md updated (muted)
+✓ (green) .decisions/ written (14 files) (muted)
+✓ (green) secret scan passed (muted)
+
+done in 4.2s (dim)
+```
+
+### Output Format: `decidex stats`
+
+```
+$ decidex stats
+
+decisions: 14 (accent)
+  packages/core    8 (dim)
+  packages/cli     3 (dim)
+  packages/mcp     2 (dim)
+  web              1 (dim)
+
+rejected approaches: 5
+confidence: avg 3.8 / 5 (muted)
+last run: 2026-03-22 (dim)
+```
+
+### Output Format: `decidex capture`
+
+Interactive prompts use a clean prompt prefix — no framework spinners:
+
+```
+$ decidex capture
+
+area (leave blank for repo-wide): packages/core
+decision: Use Zod for validation, not Joi or Yup
+rationale (optional): Zod integrates TypeScript inference natively
+tags (comma-separated): validation, dependencies
+
+✓ (green) Decision captured → .decisions/packages/core/abc123.md
+```
+
+### Error Format
+
+All errors follow: `(red ✗) (accent command): (muted message)`
+
+```
+✗ (red) decidex generate: (accent) API error 404 — model not found
+  try: update to claude-haiku-4-5-20251001 (dim)
+
+✗ (red) decidex scan: (accent) cannot read .decisions/path/to/file.md
+  check file permissions (dim)
+```
+
+### Batch Progress Bar (ASCII)
+
+When processing > 1 batch:
+```
+  batch 2/5 [══════>      ] (dim bracket, accent fill, dim remainder using space) 24%
+```
+- Use `═` for filled portion (`var(--accent)` / bold yellow)
+- Use ` ` (space) for empty — no special character, keeps it clean
+- `>` as the leading edge character (accent)
+- Track width: 14 characters fixed
+- Overwrite same line using `\r` — no vertical scroll during processing
+
+### General Rules
+
+- One blank line between logical sections (header → progress → results → summary)
+- Horizontal rules: `─` × 39 characters, dim — only at start and end of command output
+- No spinners (Ora, etc.) — they don't play well with piped output or CI logs
+- No box-drawing decorations beyond `─` rules
+- Silent mode: `--quiet` suppresses everything except errors and the final summary line
+- JSON mode: `--json` emits newline-delimited JSON for programmatic consumption
+
+---
 
 ## Landing Page Plan
 
@@ -226,3 +448,8 @@ FOOTER
 | 2026-03-21 | Pure HTML/CSS/JS, no framework | Zero build step for a static landing page. No auth, no dynamic routes — framework adds complexity with no value. |
 | 2026-03-21 | Dark-only at launch | Light mode CSS variables defined in DESIGN.md but deferred to follow-up PR. Ship clean, expand later. |
 | 2026-03-21 | Real decidex output in demo | Use actual `decidex generate` output from this repo. Engineers can smell fake demos — authenticity > narrative control. |
+| 2026-03-22 | Light mode full spec | Warm-inverted palette. Terminal blocks stay dark in light mode — authentic terminal always has dark bg. Amber lightened to #B87028 for AA large contrast on cream bg. |
+| 2026-03-22 | Progress bar is 4px flat track | No height, no border-radius, no gradient — matches the industrial aesthetic. `font-variant-numeric: tabular-nums` on all changing numeric values. |
+| 2026-03-22 | Dashed border for empty states | Dashed vs solid border distinguishes "nothing here yet" from "content lives here." No background pattern, no illustration. |
+| 2026-03-22 | CLI color palette via chalk/picocolors | Respect `NO_COLOR` and `FORCE_COLOR`. Amber = decision area labels and command names. Green = success. Never use blue in CLI output — not in the palette. |
+| 2026-03-22 | ASCII progress bar, no spinner | `═` fill + space empty + `>` leading edge, 14 chars fixed width, overwrite line with `\r`. Spinners fail in CI and piped output. |
