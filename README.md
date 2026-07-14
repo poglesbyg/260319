@@ -54,6 +54,22 @@ After `generate`, your `CLAUDE.md` will contain an auto-managed section like:
 <!-- decidex:end -->
 ```
 
+## Using decidex in a Python repo (or any non-Node language)
+
+decidex classifies decisions from git commit **messages** via an LLM, not by parsing source code — it's language-agnostic. Using it in a Python repo works exactly like the Quickstart above, with two things to know:
+
+- **Node.js ≥ 20 is still required** to run the `decidex` CLI itself, even though your project isn't JS. If your dev environment or CI image is Python-only, add a Node setup step.
+- **Watch out if you also use the Python [`pre-commit`](https://pre-commit.com) framework.** Both it and `decidex init` want to own `.git/hooks/pre-commit`. decidex appends to an existing hook rather than overwriting it, but `pre-commit`'s generated hook typically ends by `exec`-ing itself, which replaces the shell process and silently prevents anything appended after it — including decidex's secret scanner — from ever running. Run `decidex init` *before* `pre-commit install`, or check `.git/hooks/pre-commit` afterward to confirm both blocks actually execute.
+
+Decisions get tagged by directory (`area`), which maps naturally onto typical Python layouts — `src/api/`, `app/models/`, `myproject/db/`, etc.:
+
+```bash
+decidex capture "Use Pydantic for request validation, not dataclasses" \
+  --area src/api/ \
+  --rationale "Need runtime validation, not just type hints" \
+  --tags api,validation
+```
+
 ## Commands
 
 ### `decidex init`
