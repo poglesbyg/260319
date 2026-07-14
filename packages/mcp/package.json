@@ -1,7 +1,7 @@
 {
   "name": "@decidex/mcp",
-  "version": "0.1.1",
-  "description": "MCP server for decidex \u2014 surfaces engineering decisions to Claude Code",
+  "version": "0.1.2",
+  "description": "MCP server for decidex — surfaces engineering decisions to Claude Code",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -35,7 +35,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@decidex/core": "^0.1.1",
+    "@decidex/core": "^0.1.2",
     "@modelcontextprotocol/sdk": "^1.10.0"
   },
   "devDependencies": {
