@@ -1,5 +1,8 @@
-import { describe, it, expect } from "vitest";
-import { scanText } from "./secret-scanner.js";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import * as fs from "node:fs";
+import * as path from "node:path";
+import * as os from "node:os";
+import { scanText, installPreCommitHook } from "./secret-scanner.js";
 
 const REPO_ROOT = "/tmp/test-repo"; // no allowlist file exists here
 
@@ -58,5 +61,33 @@ describe("scanText", () => {
     const result = scanText(text, REPO_ROOT);
     expect(result.clean).toBe(false);
     expect(result.findings[0].line).toBe(2);
+  });
+});
+
+describe("installPreCommitHook", () => {
+  let tmpDir: string;
+
+  beforeEach(() => {
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "decidex-precommit-"));
+    fs.mkdirSync(path.join(tmpDir, ".git", "hooks"), { recursive: true });
+  });
+
+  afterEach(() => {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  it("guards the scan call with a PATH check instead of relying on npx", () => {
+    installPreCommitHook(tmpDir);
+    const content = fs.readFileSync(path.join(tmpDir, ".git", "hooks", "pre-commit"), "utf8");
+    expect(content).toContain("command -v decidex");
+    expect(content).not.toContain("npx decidex");
+  });
+
+  it("skips scanning (exit 0) rather than blocking when decidex isn't on PATH", () => {
+    installPreCommitHook(tmpDir);
+    const content = fs.readFileSync(path.join(tmpDir, ".git", "hooks", "pre-commit"), "utf8");
+    // The guard clause must exit 0 (skip), not fall through to a blocked commit.
+    const guardBlock = content.split("command -v decidex")[1].split("fi")[0];
+    expect(guardBlock).toContain("exit 0");
   });
 });

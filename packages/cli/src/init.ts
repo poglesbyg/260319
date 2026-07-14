@@ -6,6 +6,7 @@ import { isGitRepo, getRepoRoot } from "./git.js";
 
 export interface InitOptions {
   noHook?: boolean;
+  noDesktop?: boolean;
 }
 
 /**
@@ -34,16 +35,18 @@ function claudeDesktopConfigPath(): string | null {
   return path.join(xdg, "Claude", "claude_desktop_config.json");
 }
 
-/** Merge the decidex MCP server entry into a Claude Desktop config file. */
-function upsertDesktopConfig(configPath: string, repoRoot: string): "created" | "updated" | "exists" {
+/**
+ * Merge the decidex MCP server entry into an existing Claude Desktop config file.
+ * Caller must ensure the file already exists — this never creates one from scratch,
+ * since that would imply Claude Desktop is installed when it might not be.
+ */
+function upsertDesktopConfig(configPath: string, repoRoot: string): "updated" | "exists" {
   let config: Record<string, unknown> = {};
 
-  if (fs.existsSync(configPath)) {
-    try {
-      config = JSON.parse(fs.readFileSync(configPath, "utf8"));
-    } catch {
-      // treat as empty if unparseable
-    }
+  try {
+    config = JSON.parse(fs.readFileSync(configPath, "utf8"));
+  } catch {
+    // treat as empty if unparseable
   }
 
   const servers = (config.mcpServers ?? {}) as Record<string, unknown>;
@@ -53,12 +56,11 @@ function upsertDesktopConfig(configPath: string, repoRoot: string): "created" | 
   config.mcpServers = servers;
 
   const dir = path.dirname(configPath);
-  fs.mkdirSync(dir, { recursive: true });
   const tmp = path.join(dir, ".decidex-init.tmp");
   fs.writeFileSync(tmp, JSON.stringify(config, null, 2) + "\n", "utf8");
   fs.renameSync(tmp, configPath);
 
-  return fs.existsSync(configPath) ? "updated" : "created";
+  return "updated";
 }
 
 /** Run the init command — wire up decidex in this repo. */
@@ -115,16 +117,18 @@ export function runInit(cwd: string, opts: InitOptions): void {
     console.log(`✓ Created ${claudeCodeConfig}`);
   }
 
-  // 3. Configure Claude Desktop (if installed)
+  // 3. Configure Claude Desktop, but only if it's actually installed on this
+  // machine (its config file already exists) — never create it from scratch,
+  // and never touch it without explicit opt-in via --no-desktop.
   const desktopConfigPath = claudeDesktopConfigPath();
-  if (desktopConfigPath) {
+  if (opts.noDesktop) {
+    // skip
+  } else if (desktopConfigPath && fs.existsSync(desktopConfigPath)) {
     const desktopResult = upsertDesktopConfig(desktopConfigPath, repoRoot);
     if (desktopResult === "exists") {
       console.log(`✓ Claude Desktop MCP already configured`);
-    } else if (desktopResult === "updated") {
-      console.log(`✓ Updated Claude Desktop config (${desktopConfigPath})`);
     } else {
-      console.log(`✓ Created Claude Desktop config (${desktopConfigPath})`);
+      console.log(`✓ Updated Claude Desktop config (${desktopConfigPath})`);
     }
   }
 

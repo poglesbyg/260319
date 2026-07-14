@@ -16,8 +16,9 @@ program
   .command("init")
   .description("Wire up decidex: install git hooks and configure MCP for Claude Code")
   .option("--no-hook", "Skip git hook installation")
+  .option("--no-desktop", "Skip configuring Claude Desktop's MCP config")
   .action((opts) => {
-    runInit(process.cwd(), { noHook: !opts.hook });
+    runInit(process.cwd(), { noHook: !opts.hook, noDesktop: !opts.desktop });
   });
 
 program

@@ -116,10 +116,15 @@ if [ -z "$STAGED" ]; then
   exit 0
 fi
 
+if ! command -v decidex >/dev/null 2>&1; then
+  echo "[decidex] Warning: 'decidex' not found on PATH — skipping secret scan (run 'npm install -g decidex')"
+  exit 0
+fi
+
 FOUND=0
 for FILE in $STAGED; do
   if [ -f "$FILE" ]; then
-    RESULT=$(npx decidex scan "$FILE" 2>/dev/null)
+    RESULT=$(decidex scan "$FILE" 2>/dev/null)
     if [ $? -ne 0 ]; then
       echo "[decidex] Secret detected in $FILE:"
       echo "$RESULT"

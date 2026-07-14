@@ -6,6 +6,7 @@ import {
   getDecisions,
   injectDecisions,
   validateArea,
+  decisionFilePath,
   type Decision,
   type InjectionTarget,
 } from "@decidex/core";
@@ -65,7 +66,7 @@ export function runCapture(cwd: string, text: string, opts: CaptureOptions): voi
   };
 
   writeDecision(repoRoot, decision);
-  console.log(`✓ Decision captured → .decisions/${area || ""}${decision.id}.md`);
+  console.log(`✓ Decision captured → ${path.relative(repoRoot, decisionFilePath(repoRoot, area, decision.id))}`);
 
   // Update CLAUDE.md
   const claudeMDPath = path.join(repoRoot, "CLAUDE.md");
