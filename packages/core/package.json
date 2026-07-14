@@ -1,7 +1,7 @@
 {
   "name": "@decidex/core",
   "version": "0.1.1",
-  "description": "Core library for decidex — capture and retrieve engineering decisions",
+  "description": "Core library for decidex \u2014 capture and retrieve engineering decisions",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -37,7 +37,7 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "prepublishOnly": "npm run build",
+    "prepublishOnly": "cp ../../README.md . && npm run build",
     "test": "vitest run",
     "clean": "rm -rf dist"
   },

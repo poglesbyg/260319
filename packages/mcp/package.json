@@ -1,7 +1,7 @@
 {
   "name": "@decidex/mcp",
   "version": "0.1.1",
-  "description": "MCP server for decidex — surfaces engineering decisions to Claude Code",
+  "description": "MCP server for decidex \u2014 surfaces engineering decisions to Claude Code",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -30,7 +30,7 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "prepublishOnly": "npm run build",
+    "prepublishOnly": "cp ../../README.md . && npm run build",
     "test": "vitest run --passWithNoTests",
     "clean": "rm -rf dist"
   },
