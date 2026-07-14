@@ -7,3 +7,4 @@ packages/*/README.md
 .env
 .env.local
 .decidex/state.json
+.DS_Store
