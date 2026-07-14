@@ -1,6 +1,6 @@
 {
   "name": "decidex",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Capture engineering decisions so your AI tools never forget them",
   "license": "MIT",
   "repository": {
@@ -9,11 +9,22 @@
     "directory": "packages/cli"
   },
   "homepage": "https://github.com/poglesbyg/decidex#readme",
-  "keywords": ["ai", "claude", "decisions", "engineering", "mcp", "cursor", "copilot", "cli"],
+  "keywords": [
+    "ai",
+    "claude",
+    "decisions",
+    "engineering",
+    "mcp",
+    "cursor",
+    "copilot",
+    "cli"
+  ],
   "bin": {
     "decidex": "./dist/main.js"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "engines": {
     "node": ">=20"
   },
@@ -27,7 +38,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@decidex/core": "^0.1.0",
+    "@decidex/core": "^0.1.1",
     "commander": "^12.0.0"
   },
   "devDependencies": {

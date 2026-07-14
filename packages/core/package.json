@@ -1,6 +1,6 @@
 {
   "name": "@decidex/core",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Core library for decidex — capture and retrieve engineering decisions",
   "license": "MIT",
   "repository": {
@@ -9,7 +9,15 @@
     "directory": "packages/core"
   },
   "homepage": "https://github.com/poglesbyg/decidex#readme",
-  "keywords": ["ai", "claude", "decisions", "engineering", "mcp", "cursor", "copilot"],
+  "keywords": [
+    "ai",
+    "claude",
+    "decisions",
+    "engineering",
+    "mcp",
+    "cursor",
+    "copilot"
+  ],
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -18,7 +26,9 @@
       "default": "./dist/index.js"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "engines": {
     "node": ">=20"
   },
