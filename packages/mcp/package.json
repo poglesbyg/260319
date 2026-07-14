@@ -1,6 +1,6 @@
 {
   "name": "@decidex/mcp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "MCP server for decidex — surfaces engineering decisions to Claude Code",
   "license": "MIT",
   "repository": {
@@ -9,11 +9,19 @@
     "directory": "packages/mcp"
   },
   "homepage": "https://github.com/poglesbyg/decidex#readme",
-  "keywords": ["ai", "claude", "mcp", "decisions", "engineering"],
+  "keywords": [
+    "ai",
+    "claude",
+    "mcp",
+    "decisions",
+    "engineering"
+  ],
   "bin": {
     "decidex-mcp": "./dist/index.js"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "engines": {
     "node": ">=20"
   },
@@ -27,7 +35,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@decidex/core": "^0.1.0",
+    "@decidex/core": "^0.1.1",
     "@modelcontextprotocol/sdk": "^1.10.0"
   },
   "devDependencies": {
