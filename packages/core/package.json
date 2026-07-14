@@ -1,7 +1,7 @@
 {
   "name": "@decidex/core",
-  "version": "0.1.1",
-  "description": "Core library for decidex \u2014 capture and retrieve engineering decisions",
+  "version": "0.1.2",
+  "description": "Core library for decidex — capture and retrieve engineering decisions",
   "license": "MIT",
   "repository": {
     "type": "git",
